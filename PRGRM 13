@@ -1,0 +1,137 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MEMORY_SIZE 100
+
+// Memory block structure
+struct MemoryBlock {
+    int start_address;
+    int size;
+    int allocated;
+};
+
+// Function prototypes
+void initializeMemory(struct MemoryBlock memory[], int size);
+void displayMemory(struct MemoryBlock memory[], int size);
+void firstFit(struct MemoryBlock memory[], int size, int process_size);
+void bestFit(struct MemoryBlock memory[], int size, int process_size);
+void worstFit(struct MemoryBlock memory[], int size, int process_size);
+
+int main() {
+    struct MemoryBlock memory[MEMORY_SIZE];
+    int choice, process_size;
+
+    initializeMemory(memory, MEMORY_SIZE);
+
+    while (1) {
+        printf("\nMemory Allocation Strategies:\n");
+        printf("1. First Fit\n");
+        printf("2. Best Fit\n");
+        printf("3. Worst Fit\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        if (choice == 4) {
+            break;
+        }
+
+        printf("Enter process size: ");
+        scanf("%d", &process_size);
+
+        switch(choice) {
+            case 1:
+                firstFit(memory, MEMORY_SIZE, process_size);
+                break;
+            case 2:
+                bestFit(memory, MEMORY_SIZE, process_size);
+                break;
+            case 3:
+                worstFit(memory, MEMORY_SIZE, process_size);
+                break;
+            default:
+                printf("Invalid choice!\n");
+        }
+
+        displayMemory(memory, MEMORY_SIZE);
+    }
+
+    return 0;
+}
+
+// Initialize memory blocks
+void initializeMemory(struct MemoryBlock memory[], int size) {
+    for (int i = 0; i < size; i++) {
+        memory[i].start_address = i * 10; // Assuming each block size is 10
+        memory[i].size = 10;
+        memory[i].allocated = 0;
+    }
+}
+
+// Display memory blocks
+void displayMemory(struct MemoryBlock memory[], int size) {
+    printf("\nMemory Block:\n");
+    printf("Start Address | Size | Allocated\n");
+    for (int i = 0; i < size; i++) {
+        printf("%13d | %4d | %9s\n", memory[i].start_address, memory[i].size, 
+               memory[i].allocated ? "Yes" : "No");
+    }
+}
+
+// First Fit memory allocation
+void firstFit(struct MemoryBlock memory[], int size, int process_size) {
+    for (int i = 0; i < size; i++) {
+        if (!memory[i].allocated && memory[i].size >= process_size) {
+            memory[i].allocated = 1;
+            printf("Process allocated at address %d using First Fit\n", memory[i].start_address);
+            return;
+        }
+    }
+    printf("Process cannot be allocated using First Fit\n");
+}
+
+// Best Fit memory allocation
+void bestFit(struct MemoryBlock memory[], int size, int process_size) {
+    int best_index = -1;
+    int min_fragmentation = MEMORY_SIZE + 1;
+
+    for (int i = 0; i < size; i++) {
+        if (!memory[i].allocated && memory[i].size >= process_size) {
+            int fragmentation = memory[i].size - process_size;
+            if (fragmentation < min_fragmentation) {
+                min_fragmentation = fragmentation;
+                best_index = i;
+            }
+        }
+    }
+
+    if (best_index != -1) {
+        memory[best_index].allocated = 1;
+        printf("Process allocated at address %d using Best Fit\n", memory[best_index].start_address);
+    } else {
+        printf("Process cannot be allocated using Best Fit\n");
+    }
+}
+
+// Worst Fit memory allocation
+void worstFit(struct MemoryBlock memory[], int size, int process_size) {
+    int worst_index = -1;
+    int max_fragmentation = -1;
+
+    for (int i = 0; i < size; i++) {
+        if (!memory[i].allocated && memory[i].size >= process_size) {
+            int fragmentation = memory[i].size - process_size;
+            if (fragmentation > max_fragmentation) {
+                max_fragmentation = fragmentation;
+                worst_index = i;
+            }
+        }
+    }
+
+    if (worst_index != -1) {
+        memory[worst_index].allocated = 1;
+        printf("Process allocated at address %d using Worst Fit\n", memory[worst_index].start_address);
+    } else {
+        printf("Process cannot be allocated using Worst Fit\n");
+    }
+}
