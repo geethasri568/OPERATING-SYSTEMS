@@ -1,0 +1,176 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_FILES 100
+#define MAX_FILENAME_LENGTH 50
+#define MAX_DIRECTORIES 50
+#define MAX_DIRECTORY_NAME_LENGTH 50
+
+// Structure to represent a file
+struct File {
+    char name[MAX_FILENAME_LENGTH];
+    int size;
+};
+
+// Structure to represent a directory
+struct Directory {
+    char name[MAX_DIRECTORY_NAME_LENGTH];
+    struct File files[MAX_FILES];
+    int num_files;
+};
+
+// Array to store directories
+struct Directory directories[MAX_DIRECTORIES];
+int num_directories = 0;
+
+// Function prototypes
+void createDirectory(char *dirname);
+void addFile(char *dirname, char *filename, int size);
+void listFiles(char *dirname);
+void deleteFile(char *dirname, char *filename);
+
+int main() {
+    int choice, size;
+    char dirname[MAX_DIRECTORY_NAME_LENGTH];
+    char filename[MAX_FILENAME_LENGTH];
+
+    while (1) {
+        printf("\nTwo-Level Directory Operations:\n");
+        printf("1. Create Directory\n");
+        printf("2. Add File\n");
+        printf("3. List Files in Directory\n");
+        printf("4. Delete File from Directory\n");
+        printf("5. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch(choice) {
+            case 1:
+                printf("Enter directory name: ");
+                scanf("%s", dirname);
+                createDirectory(dirname);
+                break;
+            case 2:
+                printf("Enter directory name: ");
+                scanf("%s", dirname);
+                printf("Enter filename: ");
+                scanf("%s", filename);
+                printf("Enter file size: ");
+                scanf("%d", &size);
+                addFile(dirname, filename, size);
+                break;
+            case 3:
+                printf("Enter directory name: ");
+                scanf("%s", dirname);
+                listFiles(dirname);
+                break;
+            case 4:
+                printf("Enter directory name: ");
+                scanf("%s", dirname);
+                printf("Enter filename to delete: ");
+                scanf("%s", filename);
+                deleteFile(dirname, filename);
+                break;
+            case 5:
+                exit(0);
+            default:
+                printf("Invalid choice!\n");
+        }
+    }
+
+    return 0;
+}
+
+// Function to create a directory
+void createDirectory(char *dirname) {
+    if (num_directories < MAX_DIRECTORIES) {
+        strcpy(directories[num_directories].name, dirname);
+        directories[num_directories].num_files = 0;
+        num_directories++;
+        printf("Directory '%s' created successfully.\n", dirname);
+    } else {
+        printf("Failed to create directory. Maximum number of directories reached.\n");
+    }
+}
+
+// Function to add a file to a directory
+void addFile(char *dirname, char *filename, int size) {
+    int dir_index = -1;
+    for (int i = 0; i < num_directories; i++) {
+        if (strcmp(directories[i].name, dirname) == 0) {
+            dir_index = i;
+            break;
+        }
+    }
+
+    if (dir_index != -1) {
+        if (directories[dir_index].num_files < MAX_FILES) {
+            strcpy(directories[dir_index].files[directories[dir_index].num_files].name, filename);
+            directories[dir_index].files[directories[dir_index].num_files].size = size;
+            directories[dir_index].num_files++;
+            printf("File '%s' added to directory '%s' successfully.\n", filename, dirname);
+        } else {
+            printf("Failed to add file. Maximum number of files reached for directory '%s'.\n", dirname);
+        }
+    } else {
+        printf("Directory '%s' not found.\n", dirname);
+    }
+}
+
+// Function to list all files in a directory
+void listFiles(char *dirname) {
+    int dir_index = -1;
+    for (int i = 0; i < num_directories; i++) {
+        if (strcmp(directories[i].name, dirname) == 0) {
+            dir_index = i;
+            break;
+        }
+    }
+
+    if (dir_index != -1) {
+        if (directories[dir_index].num_files == 0) {
+            printf("No files found in directory '%s'.\n", dirname);
+        } else {
+            printf("List of Files in Directory '%s':\n", dirname);
+            for (int i = 0; i < directories[dir_index].num_files; i++) {
+                printf("Name: %s, Size: %d\n", directories[dir_index].files[i].name, directories[dir_index].files[i].size);
+            }
+        }
+    } else {
+        printf("Directory '%s' not found.\n", dirname);
+    }
+}
+
+// Function to delete a file from a directory
+void deleteFile(char *dirname, char *filename) {
+    int dir_index = -1;
+    for (int i = 0; i < num_directories; i++) {
+        if (strcmp(directories[i].name, dirname) == 0) {
+            dir_index = i;
+            break;
+        }
+    }
+
+    if (dir_index != -1) {
+        int found = 0;
+        for (int i = 0; i < directories[dir_index].num_files; i++) {
+            if (strcmp(directories[dir_index].files[i].name, filename) == 0) {
+                found = 1;
+                // Remove the file by shifting the remaining files
+                for (int j = i; j < directories[dir_index].num_files - 1; j++) {
+                    strcpy(directories[dir_index].files[j].name, directories[dir_index].files[j + 1].name);
+                    directories[dir_index].files[j].size = directories[dir_index].files[j + 1].size;
+                }
+                directories[dir_index].num_files--;
+                printf("File '%s' deleted from directory '%s' successfully.\n", filename, dirname);
+                break;
+            }
+        }
+        if (!found) {
+            printf("File '%s' not found in directory '%s'.\n", filename, dirname);
+        }
+    } else {
+        printf("Directory '%s' not found.\n", dirname);
+    }
+}
