@@ -1,0 +1,57 @@
+#include<stdio.h>
+
+struct Process {
+    int pid;
+    int burst_time;
+    int remaining_time;
+};
+
+void roundRobin(struct Process processes[], int n, int quantum) {
+    int total_time = 0;
+    int i, remaining_processes = n;
+    
+    // Initialize remaining time for all processes
+    for(i = 0; i < n; i++) {
+        processes[i].remaining_time = processes[i].burst_time;
+    }
+    
+    // Keep traversing processes in round robin manner until all are done
+    while(remaining_processes > 0) {
+        for(i = 0; i < n; i++) {
+            if(processes[i].remaining_time > 0) {
+                if(processes[i].remaining_time > quantum) {
+                    total_time += quantum;
+                    processes[i].remaining_time -= quantum;
+                }
+                else {
+                    total_time += processes[i].remaining_time;
+                    processes[i].remaining_time = 0;
+                    printf("Process %d completed at time %d\n", processes[i].pid, total_time);
+                    remaining_processes--;
+                }
+            }
+        }
+    }
+}
+
+int main() {
+    int n, quantum, i;
+    
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+    
+    struct Process processes[n];
+    
+    for(i = 0; i < n; i++) {
+        processes[i].pid = i+1;
+        printf("Enter burst time for process %d: ", i+1);
+        scanf("%d", &processes[i].burst_time);
+    }
+    
+    printf("Enter time quantum: ");
+    scanf("%d", &quantum);
+    
+    roundRobin(processes, n, quantum);
+    
+    return 0;
+}
