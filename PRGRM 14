@@ -1,0 +1,105 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_FILES 100
+#define MAX_FILENAME_LENGTH 50
+
+// Structure to represent a file
+struct File {
+    char name[MAX_FILENAME_LENGTH];
+    int size;
+};
+
+// Array to store files
+struct File files[MAX_FILES];
+int num_files = 0;
+
+// Function prototypes
+void addFile(char *filename, int size);
+void listFiles();
+void deleteFile(char *filename);
+
+int main() {
+    int choice, size;
+    char filename[MAX_FILENAME_LENGTH];
+
+    while (1) {
+        printf("\nSingle-Level Directory Operations:\n");
+        printf("1. Add File\n");
+        printf("2. List Files\n");
+        printf("3. Delete File\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch(choice) {
+            case 1:
+                printf("Enter filename: ");
+                scanf("%s", filename);
+                printf("Enter file size: ");
+                scanf("%d", &size);
+                addFile(filename, size);
+                break;
+            case 2:
+                listFiles();
+                break;
+            case 3:
+                printf("Enter filename to delete: ");
+                scanf("%s", filename);
+                deleteFile(filename);
+                break;
+            case 4:
+                exit(0);
+            default:
+                printf("Invalid choice!\n");
+        }
+    }
+
+    return 0;
+}
+
+// Function to add a file
+void addFile(char *filename, int size) {
+    if (num_files < MAX_FILES) {
+        strcpy(files[num_files].name, filename);
+        files[num_files].size = size;
+        num_files++;
+        printf("File '%s' added successfully.\n", filename);
+    } else {
+        printf("Failed to add file. Maximum number of files reached.\n");
+    }
+}
+
+// Function to list all files
+void listFiles() {
+    if (num_files == 0) {
+        printf("No files found.\n");
+    } else {
+        printf("List of Files:\n");
+        for (int i = 0; i < num_files; i++) {
+            printf("Name: %s, Size: %d\n", files[i].name, files[i].size);
+        }
+    }
+}
+
+// Function to delete a file
+void deleteFile(char *filename) {
+    int found = 0;
+    for (int i = 0; i < num_files; i++) {
+        if (strcmp(files[i].name, filename) == 0) {
+            found = 1;
+            // Remove the file by shifting the remaining files
+            for (int j = i; j < num_files - 1; j++) {
+                strcpy(files[j].name, files[j + 1].name);
+                files[j].size = files[j + 1].size;
+            }
+            num_files--;
+            printf("File '%s' deleted successfully.\n", filename);
+            break;
+        }
+    }
+    if (!found) {
+        printf("File '%s' not found.\n", filename);
+    }
+}
